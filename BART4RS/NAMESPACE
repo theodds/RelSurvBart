@@ -1,0 +1,11 @@
+useDynLib(BART4RS, .registration = TRUE)
+
+exportPattern("^[[:alpha:]]+")
+importFrom(Batman, CoxPEBart)
+importFrom(Batman, CoxNPHBart)
+importFrom(caret, dummyVars)
+importFrom(caret, contr.ltfr)
+import(Rcpp)
+import(methods)
+importFrom(rstan, sampling)
+importFrom(survival, Surv)

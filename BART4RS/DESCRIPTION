@@ -1,0 +1,34 @@
+Package: BART4RS
+Type: Package
+Title: BART for Additive Hazards Survival Models
+Version: 0.1.0
+Author: Antonio Linero
+Maintainer: Antonio Linero <antonio.linero@austin.utexas.edu>
+Description: This package fits Bayesian nonparametric additive hazards survival 
+    models. The primary function uses a piecewise-exponential baseline hazard
+    model combined with a BART model to fit a proportional hazards model to
+    the excess hazard function.
+License: GPL Version 2
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    Batman,
+    survival,
+    methods,
+    Rcpp (>= 0.12.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    rstantools (>= 2.3.1.1)
+Biarch: true
+Depends: 
+    R (>= 3.4.0),
+    survival
+LinkingTo: 
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0),
+    RcppParallel (>= 5.0.1),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0),
+SystemRequirements: GNU make
+RoxygenNote: 7.2.3

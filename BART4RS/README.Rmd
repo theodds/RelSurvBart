@@ -1,0 +1,56 @@
+---
+title: "README"
+author: "Antonio R. Linero"
+date: "2023-09-08"
+output: html_document
+---
+
+Where did we leave off? Needed to debug whether the method for computing the
+log-likelihood of the method was working as intended, in particular when doing a
+train-test split. How do I find out whether this works?
+
+-   [ ] Open the project, find the file
+-   [ ] Write up how coxpe_bart goes about computing the likelihoods on the test
+    data, in particular when outside the range of the observed data.
+-   [ ] xxx
+
+# How it works?
+
+We feed in a time grid. The method currently *only* returns the evaluations for
+lambda on the test set. So we have just gridpoints
+$0 = t_1 < t_2 < \cdots < t_B < \infty$; for Leukemia it was $B = 17$ cutpoints,
+so there should be a total of $17$ bins (as we can go above $t_B$ as well, in
+principle). In retrospect, I think we shouldn't take the max to be the final
+bin, because we never end up seeing anybody with $Y > t_B$; I should check to
+see if I even compute a $\lambda$ for this. Indeed, it looks like I only record
+$16$ of them, so the method doesn't adequately extrapolate (I don't even have a
+$\lambda$ for these guys...).
+
+So, in reality, I think I actually just have $B - 1$ bins, and the upper
+quantile doesn't actually get used. The presumption seems to be that *all*
+observations will land in the required bins.
+
+# Work
+
+- [x] Compile and test Piyali code for mixing
+- [ ] Fixing CV stuff?
+- [ ] Check: how does lambda PE model make use of the bins when someone is
+      beyond the highest category?
+- [ ] 
+
+# Prior?
+
+How to specify prior on $\lambda_scale$? This is the scale of the failure time
+due to disease; things are hard, in theory, because we only observe the min of
+this and the actual failure time, so if the disease does not do much then we
+won't be able to pin this down. Some simple heuristics: let's assume that at
+least 1 person in the sample died from the disease. That would suggest that
+the scale should be less than the max of the Y's (assuming the scale is also
+the mean under my parameterization).
+
+In practice, I found this didn't really work that well in settings where some
+individuals are close-to-cured. Rather than doing this, I decided to just
+implement a `gamma(1,1)`, and work with the assumption that folks will normalize
+the data themselves so that a time of 1 corresponds to a reasonably long
+survival time (and the exponential should do a good job of adapting to the
+data here).
