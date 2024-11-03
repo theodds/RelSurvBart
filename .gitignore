@@ -389,3 +389,9 @@ TSWLatexianTemp*
 
 *weibull_stan.rds
 *.DS_Store
+Paper/.pdf-view-restore
+Code/figures/01_add_sum.pdf
+Code/figures/01_hazplot.pdf
+Code/figures/01_p_rsq.pdf
+Code/figures/02_survival_gam.pdf
+Code/figures/02_survival_varimp.pdf

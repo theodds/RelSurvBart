@@ -1,0 +1,5 @@
+source("src/01_survival_ph.R")
+source("src/02_survival_nph.R")
+source("src/03_CV.R")
+source("src/04_simulation_ph.R")
+source("src/05_simulation_nph.R")

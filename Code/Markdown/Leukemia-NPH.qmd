@@ -1,0 +1,187 @@
+---
+title: "Non-Proportional Hazards Illustration"
+format: pdf
+editor: visual
+bibliography: references.bib
+execute:
+  cache: true
+---
+
+# Initial Model Fit
+
+In this document, we illustrate the use of the non-proportinal hazards BART model for relative survival:
+
+$$
+  \lambda(t \mid x) + \lambda_P(t \mid x) + 
+    \lambda_{0E}(t) \, \exp\left\{r(x,t)\right\}.
+$$
+
+where $r(x,t)$ is modeled using a Bayesian decision tree ensemble. First, we load the required packages:
+
+```{r loadpacks, message = FALSE}
+library(loo)
+library(ggdist)
+library(spBayesSurv)
+library(mgcv)
+library(rpart)
+library(rpart.plot)
+library(possum)
+library(BART4RS)
+library(tidybayes)
+library(tidyverse)
+theme_set(theme_bw())
+SEED <- digest::digest2int("analyze leukemia")
+```
+
+As with the PH model, we use the leukemia dataset in the `spBayesSurv` package with hazards computed from life tables:
+
+```{r loaddata}
+data("LeukSurv")
+head(LeukSurv)
+data("leuk_data")
+head(leuk_data)
+```
+
+We first set a seed so that our results can be replicated, then we use the `coxnph_bart` function in the `BART4RS` package to fit the model. We then fit the model and cache the result so that we do not need to recompute things (as this is quite expensive).
+
+```{r fitmodel}
+set.seed(digest::digest2int("Fitting NPH"))
+
+if(file.exists("fitted_nph.rds")) {
+  my_fit <- readRDS("fitted_nph.rds")
+} else {
+  my_fit <- coxnph_bart(
+    Surv(event_time, status) ~ age + sex + wbc + tpi,
+    data = leuk_data,
+    pop_haz = leuk_data$haz_rate,
+    num_burn = 1000,
+    num_save = 1000,
+    num_thin = 1
+  )
+  saveRDS(my_fit, "fitted_nph.rds")
+}
+```
+
+As with the PH model, we compute the leave-one-out expected log predictive density (ELPD) [@Vehtari2015a] as
+
+```{r elpd, message = FALSE, warning = FALSE}
+loo_nph <- loo(my_fit$loglik_obs)
+print(loo_nph)
+```
+
+For comparison, the ELPD here is substantially higher than that of the PH model, indicating a much better fit to the data.
+
+# Posterior Summarization
+
+Summarizing a non-proportional hazards model is more challenging than a proportional hazards model, as the effect of the covariates on survival is no longer constant over time. To do this, we focus on the relative survival function
+
+$$
+  S_E(t \mid x) = \exp\left\{-\int_0^t \lambda_{0E}(z) \, e^{r(x,z)} \ dz\right\}.
+$$
+
+Note that the integrals here are easy to evaluate, as the hazard is assumed piecewise constant. To isolate the effects within each bin, we consider specifically the quantities $R(b \mid x) = S_E(t_b \mid x) / S_E(t_{b-1} \mid x)$ for $b = 1, 10, 20$; these are given by
+
+$$
+  R(b \mid x) = \exp\left\{-\int_{t_{b-1}}^{t_b}
+    \lambda_{0E}(z) \, e^{r(x,z) \ dz}\right\}.
+$$
+
+Below we use the `extract_R` function to get $R(b \mid x)$ for each of the bins and then write a function that creates a visualization using the possum package for each choice of $b$.
+
+```{r possum, dev='tikz', cache=TRUE, fig.height=7}
+R <- extract_R(my_fit)
+
+possum_R <- function(j) {
+  SE_j <- R[[j]]
+  SE_j_hat <- colMeans(SE_j)
+
+  possum_summary_SE1 <-
+    possum::additive_summary(
+      SE_j_hat ~ s(age) + factor(sex) + s(logwbc) + s(tpi),
+      fhatSamples = t(SE_j),
+      fhat = SE_j_hat,
+      df = LeukSurv %>% mutate(logwbc = log(1 + wbc))
+    )
+  
+  return(possum::additive_summary_plot(possum_summary_SE1) + theme_bw())
+}
+
+plot_1 <- possum_R(1)
+plot_10 <- possum_R(10)
+plot_20 <- possum_R(20)
+
+gridExtra::grid.arrange(plot_1, plot_10, plot_20, nrow = 3)
+```
+
+From top to bottom, the rows of the figure above correspond to bins $b = 1, 10, 20$, respectively. Interestingly, we see that the evidence for the relevance of white blood cell count changes over time, while the effect of age appears to increase from $b = 1$ to $b = 10$. Both of these are trends are predictable, as the risk of dying from old age increases over time, while *current* white blood cell counts may not be predictive of survival far out into the future where an individual has already survived for many years.
+
+We can also examine the variable importance, as we did for the PH model, but now with variable importances varying over time. To do this, we write a function that makes a variable importance plot for a given $b$ and then display the results.
+
+```{r varimp, dev = 'tikz', cache=TRUE, fig.height=7}
+possum_varimp <- function(j) {
+  SE_j <- R[[j]]
+  SE_j_hat <- colMeans(SE_j)
+
+  possum_summary_SE1 <-
+    possum::additive_summary(
+      SE_j_hat ~ s(age) + factor(sex) + s(logwbc) + s(tpi),
+      fhatSamples = t(SE_j),
+      fhat = SE_j_hat,
+      df = LeukSurv %>% mutate(logwbc = log(1 + wbc))
+    )
+  possum_summary_noage <-
+    possum::additive_summary(
+      SE_j_hat ~ factor(sex) + s(logwbc) + s(tpi),
+      fhatSamples = t(SE_j),
+      fhat = SE_j_hat,
+      df = LeukSurv %>% mutate(logwbc = log(1 + wbc))
+    )
+  possum_summary_nosex <-
+    possum::additive_summary(
+      SE_j_hat ~ s(age) + s(logwbc) + s(tpi),
+      fhatSamples = t(SE_j),
+      fhat = SE_j_hat,
+      df = LeukSurv %>% mutate(logwbc = log(1 + wbc))
+    )
+  possum_summary_nowbc <-
+    possum::additive_summary(
+      SE_j_hat ~ s(age) + factor(sex) + s(tpi),
+      fhatSamples = t(SE_j),
+      fhat = SE_j_hat,
+      df = LeukSurv %>% mutate(logwbc = log(1 + wbc))
+    )
+  possum_summary_notpi <-
+    possum::additive_summary(
+      SE_j_hat ~ s(age) + factor(sex) + s(logwbc),
+      fhatSamples = t(SE_j),
+      fhat = SE_j_hat,
+      df = LeukSurv %>% mutate(logwbc = log(1 + wbc))
+    )
+  
+  rsq_df <- data.frame(Rsq = c(possum_summary_SE1$summaryRsq,
+                               possum_summary_nosex$summaryRsq,
+                               possum_summary_noage$summaryRsq,
+                               possum_summary_notpi$summaryRsq,
+                               possum_summary_nowbc$summaryRsq),
+                       Model = rep(c("All",
+                                     "Without Sex",
+                                     "Without Age",
+                                     "Without TPI",
+                                     "Without WBC"),
+                                   each = 1000))
+  
+  p_rsq <- ggplot(rsq_df) +
+    geom_density(aes(x = Rsq, y = after_stat(density), fill = Model),
+                 color = 'white', alpha = 0.3) +
+    xlab("Summary $R^2$") +
+    ylab("Density") + theme_bw()
+  
+  return(p_rsq)
+}
+
+pv1 <- possum_varimp(1)
+pv10 <- possum_varimp(10)
+pv20 <- possum_varimp(20)
+
+gridExtra::grid.arrange(pv1, pv10, pv20, nrow = 3)
+```

@@ -148,18 +148,17 @@
 \author{Piyali Basak$^{1}$\thanks{\href{mailto:piyali.basak@merck.com}{piyali.basak@merck.com}}, 
 Antonio R. Linero$^{2}$\thanks{\href{mailto:antonio.linero@austin.utexas.edu}{antonio.linero@austin.utexas.edu}},  
 Camille Maringe$^{3}$\thanks{\href{mailto:camille.maringe@lshtm.ac.uk}{camille.maringe@lshtm.ac.uk}}, \\ and
-F. Javier Rubio$^{4}$\thanks{\href{mailto:f.j.rubio@ucl.ac.uk}{f.j.rubio@ucl.ac.uk}}\\
-$^{1}$Merck \& Co., Inc., Rahway, NJ, USA  \\
-$^{2}$University of Texas, Austin, TX, USA \\
-$^{3}$ London School of Hygiene and Tropical Medicine, London, UK \\
-$^{4}$University College London, London, UK}
-
-%\author{Piyali Basak$^{1,*}$\thanks{\href{mailto:piyali.basak@merck.com}{piyali.basak@merck.com}} \ and Antonio R. Linero\thanks{\href{mailto:antonio.linero@austin.utexas.edu}{antonio.linero@austin.utexas.edu}} \ and Camille Maringe\thanks{\href{mailto:camille.maringe@lshtm.ac.uk}{camille.maringe@lshtm.ac.uk}}\ \\ and F. Javier Rubio \thanks{\href{mailto:f.j.rubio@ucl.ac.uk}{f.j.rubio@ucl.ac.uk}}} 
+F. Javier Rubio$^{4}$\thanks{\href{mailto:f.j.rubio@ucl.ac.uk}{f.j.rubio@ucl.ac.uk}}}
 
 
-%\affil[1]{Merck & Co., Inc., Rahway, NJ, USA }
-%\affil[2]{University of Texas, Austin, TX, USA}
-%\affil[3]{}
+% \author{Piyali Basak$^{1}$\thanks{\href{mailto:piyali.basak@merck.com}{piyali.basak@merck.com}}, 
+% Antonio R. Linero$^{2}$\thanks{\href{mailto:antonio.linero@austin.utexas.edu}{antonio.linero@austin.utexas.edu}},  
+% Camille Maringe$^{3}$\thanks{\href{mailto:camille.maringe@lshtm.ac.uk}{camille.maringe@lshtm.ac.uk}}, \\ and
+% F. Javier Rubio$^{4}$\thanks{\href{mailto:f.j.rubio@ucl.ac.uk}{f.j.rubio@ucl.ac.uk}}\\
+% $^{1}$Merck \& Co., Inc., Rahway, NJ, USA  \\
+% $^{2}$University of Texas, Austin, TX, USA \\
+% $^{3}$ London School of Hygiene and Tropical Medicine, London, UK \\
+% $^{4}$University College London, London, UK}
 
 \usepackage[citecolor=blue, colorlinks]{hyperref}
 
@@ -169,7 +168,25 @@ $^{4}$University College London, London, UK}
 \maketitle
 
 \begin{abstract}
-  In cancer epidemiology, the \emph{relative survival framework} is used to quantify the hazard associated with cancer by comparing the all-cause mortality hazard in cancer patients to that of the general population. This framework relies on an additive decomposition of the overall hazard function, assuming that an individual's hazard function is the sum of a known population hazard and an excess hazard (associated with the cancer of interest). Several estimands are derived from the excess hazard, including the \emph{net survival}, which are used by researchers and policymakers to inform their decisions and to assess the effectiveness of interventions on cancer management. In this paper, we introduce a Bayesian machine learning approach to estimating the excess hazard and identifying vulnerable subgroups, with a higher excess risk, using Bayesian additive regression trees (BART). We first develop a simple proportional hazards extension of the BART model on the relative survival setting, and then extend this model to allow for non-proportional hazards.  We develop tools for model interpretation and posterior summarization for both models. We then present an application using colon cancer data from England, highlighting the insights our proposed methodology offers when paired with state-of-the-art data linkage methods. This application, in particular, demonstrates how these methods can be used to identify drivers of inequalities in cancer survival through variable importance quantification.
+  In cancer epidemiology, the \emph{relative survival framework} is used to
+  quantify the hazard associated with cancer by comparing the all-cause
+  mortality hazard in cancer patients to that of the general population. This
+  framework assumes that an individual's hazard function is the sum of a known
+  population hazard and an excess hazard associated with the cancer. Several
+  estimands are derived from the excess hazard, including the \emph{net
+    survival}, which are used to inform decisions and to assess the
+  effectiveness of interventions on cancer management. In this paper, we
+  introduce a Bayesian machine learning approach to estimating the excess hazard
+  and identifying vulnerable subgroups, with a higher excess risk, using
+  Bayesian additive regression trees (BART). We first develop a proportional
+  hazards extension of the BART model to the relative survival setting, and then
+  extend this model to non-proportional hazards. We develop tools for model
+  interpretation and posterior summarization and then present an application
+  using colon cancer data from England, highlighting the insights our proposed
+  methodology offers when paired with state-of-the-art data linkage methods.
+  This application demonstrates how these methods can be used to identify
+  drivers of inequalities in cancer survival through variable importance
+  quantification.
 
   \vspace{1em}
   \noindent \textbf{Keywords:} 
@@ -186,16 +203,7 @@ $^{4}$University College London, London, UK}
 \section{Introduction}\label{sec:intro}
 
 
-% Note on net survival jargon:
-% One may want to estimate overall survival (all cause) or net survival (in relation to a specific cause of death)
-% To estimate net survival, there are two settings/framework
-% 1. Relative survival setting: when cause of death is unknown or unreliable; all-cause mortality is estimated through life tables
-% 2. Cause-specific setting: when cause of death is available, consistently recorded and reliable (e.g. in RCT)
-
 Reducing the burden of cancer is a top priority for national and international health institutions, such as the World Health Organization and the International Agency for Research on Cancer. To monitor cancer patients at the population level, several complementary indicators are used to assess cancer management, including incidence and prevalence rates, mortality rates, and survival probabilities. The survival probability represents the probability of surviving beyond a time point $t>0$, typically measured from the diagnosis of cancer. The overall survival framework is a common approach for quantifying survival, which aims at estimating survival probabilities associated with any cause of death. In cancer epidemiology, however, the overall survival framework is usually avoided as it does not quantify the survival associated only with the cancer of interest and prevents meaningful comparisons \citep{mariotto:2014,govuk:2024}. In contrast, the ``relative survival'' framework \citep{perme:2012} aims at estimating the survival associated only with the cancer under study, without requiring knowledge of the cause of death (as this may be either unavailable or unreliable at the population level). Consequently, the relative survival framework is the preferred approach for monitoring the effectiveness of the health system in preventing patients dying from cancer, and for comparing cancer survival across countries, regions within a country, or over different time periods \citep{mariotto:2014,govuk:2024,quaresma:2024}. 
-
- % Relative survival for a particular disease of interest (typically cancer) is defined as the ratio of the survival probability of the diseased population compared to the expected survival in the overall population, matched with respect to the available characteristics in the lifetables, such as age, gender, year of diagnosis, and deprivation level. 
-% As opposed to conventional survival probability which estimates survival probability in the general population without accounting for specific cause for death, relative survival estimates the relative hazard of the population due to the particular disease under study.   
 
 The key distinction between relative survival and overall survival methods lies in comparing the observed mortality hazard with an expected mortality hazard in the disease-free population. This approach offers a metric to quantify the mortality associated with a particular disease (such as cancer), removing the need for information on the actual cause of death. Relative survival analysis is a valuable and a widely used tool in population-based cancer studies, providing important insights into cancer prognosis and cancer management, while enabling efficient comparison between different population subgroups of interest. The key assumption in the relative survival framework is that the overall hazard of an individual $\lambda(\cdot)$ decomposes additively into two components: (a) the expected hazard $\lambda_P(\cdot)$ for the general population, and (b) the excess hazard $\lambda_E(\cdot)$ associated with the cancer of interest. That is, 
 \begin{equation}
@@ -204,30 +212,10 @@ The key distinction between relative survival and overall survival methods lies 
 \end{equation}
 where $\text{age}$ denotes the age at diagnosis. The population hazard $\lambda_P(t \mid \bfw)$ is assumed to be available from population-level life tables for each calendar year and region, based on a subset of the available characteristics $\bfw \in {\mathbb R}^Q$ with $\bfw \subseteq \bfx$; typically, $\bfw$ includes information about sex, age, and measures of societal deprivation. The excess hazard $\lambda_E(t \mid \bfx)$, on the other hand, is estimated using the available data and the patient characteristics $\bfx\in {\mathbb R}^P$, which include those variables in the life table ($\bfw$) along with other socio-demographic and clinical characteristics such as tumor stage. 
  
-% 
- %While cause-specific analysis is an option, accurately determining the cause of death is often challenging and may result in misclassification. In population-based research, the determination of the cause of death, typically obtained from death certificates, can be unreliable for both cancer and heart disease.
-
- % Robust/better predictions , not worry about model misspecification, interaction, uncertainty quant, flexible model to learn 
- 
- % Review of additive relativer survival model
- 
- % Discussion of the effects  - define the model parameters - how to compute them for different models.
- 
- %PH model, thinned model, p.c hazard model.
- % Equivalent to RMST - 
- %  Simulation scenarios to include
-
- % Predictions about the simulations results.
-
-%  \section{A brief review of Relative Survival Models}\label{sec:relsurv}
-% 
-%  Under the relative survival framework, the overall hazard of the event occurrence at a particular time $t$ is expressed as the sum of the population hazard and an excess hazard term, which captures the excess hazard arising due to the specific cancer of interest. 
-
 \subsection{Challenges in Relative Survival Modeling}
 
 One of the main quantities of interest in the relative survival framework is the \emph{net survival}, which is the survival function associated with the excess hazard. For an individual with characteristics $\bfx$, the net survival is defined as $S_E(t \mid \bfx) = \exp\left\{-\int_0^t \lambda_E( r \mid \bfx) \  dr\right\}$. Policy-making and epidemiological reports \citep{mariotto:2014,quaresma:2024} are typically based on the average net survival for the population of interest with characteristics $\bfX_i \sim F_X$:
 \begin{equation*}
- % S_E(t) = \dfrac{1}{M} \sum_{j=1}^M S_E(t \mid \bfx_j).
  S_E(t \mid F_X) = \int S_E(t \mid \bfx) \, F_X(d\bfx).
 \end{equation*}
 Estimating the net survival presents a variety of challenges for both parametric and nonparametric approaches. Parametric models require restrictive assumptions on the form of the excess hazard function $\lambda_E(t \mid \bfx)$, both in terms of the parametric form of the hazard (\textit{e.g.}, Weibull, log-normal, and so forth) and in terms of how the covariates enter the model and interact with time (\textit{e.g.}, accelerated failure time or proportional hazards models). These assumptions may not always hold in practice, leading to biased estimates or inaccurate predictions if they are not properly validated. In the parametric framework, several methods have been proposed for modeling the excess hazard, such as using general parametric hazard structures \citep{rubio:2019}, or modeling the baseline excess hazard (or cumulative excess hazard) and non-linear effects using splines \citep{giorgi:2003,dickman:2004,charvat:2021,fauvernier:2019,quaresma:2020,eletti:2022}. Other approaches include the four methods described by \cite{dickman:2004}, who assume that the excess hazard is constant within pre-specified intervals to establish a link with Generalized Linear Models (GLM), thus facilitating the estimation of the regression model, as well as approaches utilizing multivariate fractional polynomials (MFP) under an additive hazard structure \citep{lambert:2005}. Each of these modelling frameworks require a careful specification of the role of each covariate as well as the specification of the spline basis.
@@ -235,26 +223,9 @@ Estimating the net survival presents a variety of challenges for both parametric
 
 In practice, structural assumptions like proportional hazards are often unrealistic, and opting for a flexible modeling approach that allows for potential non-linearity and multi-way interactions between the covariates and survival time may be crucial to fully understand the dynamics of the disease. In these cases, fully-nonparametric estimators of the net survival may be preferred. Nonparametric estimators of net survival have a rich and interesting history, with several methods proposed that, in fact, failed to estimate the net survival. These include the so-called \textit{Ederer I} and \textit{Ederer II} estimators \citep{ederer:1961}. We refer the reader to \cite{perme:2012} for a through review of nonparametric estimators of net survival and their corresponding limitations. Nonparametric estimators of net survival are based on estimating the cumulative excess hazard \citep{perme:2012}, in a similar fashion as the Nelson-Aalen estimator of the overall cumulative hazard \citep{aalen:1978}, using counting processes. While often viewed as a gold-standard for estimating the net survival function, Nelson-Aalen type estimators are limited in that (i) estimates of the cumulative excess hazard may be negative (thus leading to non-monotonic net survival functions) and (ii) incorporating covariate information requires stratification by the covariates, which can present challenges when handling continuous variables and may result in a loss of power due to sparse strata. Hence there is a need for methods that combine the flexibility of Nelson-Aalen type estimators with the ability to borrow information across sub-populations offered by parametric methods.
 
-% \tony{(Did we not want to include these commented lines?)} \textcolor{red}{J: To be incorporated in the above literature review.}
-%  % Two of the most fundamental approaches for relative survival analysis under the parametric set up were provided by Hakulinen [XXXX] and Estve [XXXX]. While Hakulinen and Dickman et al use a Generalized Linear Model (GLM) based approach with count distributions to model the number of deaths, Esteve uses a full maximum likelihood estimation technique to carry out inference. A popular assumption for these models is a piece-wise constant baseline hazard. Parametric models  suffer from overly restrictive assumptions on the modelling of baseline hazard function, incorporation of covariates in the model and their interaction with time. These assumptions may not always hold in real-world data, leading to biased estimates or inaccurate predictions if not properly validated. To address potential non-proportional excess hazards, the conventional approach employed in these models involves integrating time-varying covariates as interaction terms. 
- 
-%  % More recently, alternative approaches have been proposed utilizing multivariate fractional polynomials (MFP) [Lambert et al, 2005] and restricted cubic spline functions [Bolard, 2002] to characterize time-varying hazard ratios and the baseline excess hazard. Georgi et al suggested using B-spline to model the potential non-proportional hazard function [Giorgi et al, 2003]. A drawback of most of these models is that they fail to consider any data adaptive transformation of covariates, thus leading to inadequate accuracies in survival estimation. 
-
-%  % Our literature review suggests limited publications on  net survival models built under semi-parametric framework [Pohar Perme, 2009 and Sasieni , 1996]. Pohar and Perme (2012) introduced non-parametric framework for net survival modeling using inverse probability weighting. This method has gained wide popularity in cancer studies but may suffer from high variability and wider confidence intervals for model parameter estimates [Comparison of different approaches to estimating age standardized net survival - Lambert et al, 2015]. In addition, as Maringe et al [] pointed out,  a potential issue with the approach, highlighting that it may become non-decreasing towards the tail, which violates basic assumptions of survival models. Zahl [1996]
- 
 \subsection{Background and Research Questions}
 
 The quality and availability of population-based data have increased in recent years, thus allowing richer information on cancer patients through linkage of various data sources collected at primary and secondary care settings. These efforts have motivated the development of algorithms aimed at deriving key information, not readily available or collected, such as route to diagnosis \citep{elliss:2012}, stage at diagnosis \citep{benitez:2016}, frailty scores \citep{gilbert:2018}, and the presence of comorbidities \citep{maringe:2017}. These variables offer new insights into prognostic factors for cancer survival, at population level. Stage at diagnosis is a key prognostic factor, determining treatment options \citep{nice2020colorectal}, surveillance and follow-up. Efforts in cancer awareness, prevention, and screening aim to detect signs and symptoms early and diagnose cancer at the earliest possible stage, ensuring the best possible outcomes. Nonetheless, despite health systems built on principles of equity of access and use, factors such as patient's age, level of deprivation, education, area of residence as well as clinical characteristics such as frailty or the presence of comorbidities impact cancer outcomes, isolating groups with heightened vulnerability. So far, understanding the impact of comorbidities and other socio-demographic or clinical factors has only been done on the overall survival framework \citep{rubio:2022}, which is a sub-optimal measure for cancer management, or through descriptive studies \citep{michalopoulou:2021}. The proposed methodology provides the tools to highlight the importance of each characteristic on net survival, beyond the impact of the stage at diagnosis. The specific outputs following the use of Bayesian Additive Regressive Trees (BART) for the estimation of net survival nicely complement the accurate estimation of net survival, and provide time-varying effects and variable importance: their interpretation and value are detailed in section \ref{sec:applications}. 
-
-
-%camille: Not sure the following is relevant anymore
-%In England, most cancer patients are diagnosed after age 60. At that age, cancer patients may have already developed other chronic health conditions (known as \emph{comorbidities}), possibly sharing risk factors with their cancer. These include cardiovascular diseases (CVDs), diabetes, Chronic Obstructive Pulmonary Disease (COPD), among others, as well as combinations of two or more of these comorbidities (\emph{multimorbidity}). Such health conditions are likely to impact timeliness of the cancer diagnosis, as well as prognosis, treatment, care choices, and patients' monitoring during their care \citep{sarfati:2016}.  Existing inequalities in cancer survival may be exacerbated by the presence of comorbidities, as they may complicate healthcare, the focus of this research. 
-
-% Following successful linkage of national, population-based cancer registry data to hospital records, an algorithm was proposed in \cite{maringe:2017} to derive information on the presence of comorbidities in cancer patients in the UK. 
-%Most of the efforts in understanding the impact of comorbidities on survival have focused on identifying the comorbidities that affect the \textbf{overall survival} of cancer patients \cite{rubio:2022}. We aim to highlight the use of the proposed methodology to understand and quantify the effect of biological, clinical and socio-demographic characteristics of patients on net survival.
-
-%\textcolor{red}{Epidemiological Research question here: Recent developments in data linkage ... New method + new covariates, what messages can we obtain?}
-
 
 \subsection{Our Contributions}
 
@@ -309,10 +280,6 @@ BART priors have the advantage of being relatively easy to use due to the availa
  
 
 {The additive relative survival model expresses the overall hazard of an individual as the sum of a \emph{population} hazard and an \emph{excess} hazard, as described in \eqref{eq:exh_additive_decomp}.}
-% \begin{align*}
-%     \lambda(t \mid \bfx) = \lambda_P(\text{age} + t \mid \bfw) + \lambda_E(t \mid \bfx),
-% \end{align*}
-% where $\lambda_P(\text{age} + t \mid \bfw)$ denotes the expected hazard rate for the general population (which we assume is known from mortality and lifetime tables) and $\lambda_E(t \mid \bfx)$ represents the excess hazard term due to the particular disease of interest.
 In general, the likelihood of the excess hazard model under non-informative censoring is given by \citep{rubio:2019}:
 \begin{align*}
     &\prod_i \left[\{\lambda_P(\text{age}_i + Y_i \mid \bfW_i) + \lambda_E(Y_i \mid \bfX_i)\}^{\delta_i} 
@@ -473,38 +440,8 @@ where $A_\ell = \sum_i d_i$ and  $B_\ell = \sum_{i,b} Z_{ib} \lambda_b e^{\eta_i
 
 As with the update for the $\lambda_b$'s, it is possible to take advantage of redundancy in $\sum_b Z_{ib} \lambda_b$ to reduce the computational cost of  computing $B_\ell$ from $O(NB)$ to $O(N)$. Note that by definition we have  $Z_{ib} = 1(Y_i \ge t_b) (t_b - t_{b-1}) + 1(t_{b-1} \le Y_i < t_b) (Y_i - t_{b- 1})$. Hence, $\sum_b Z_{ib} \lambda_b = \lambda_{b_i} (Y_i - t_{b_i - 1}) +  \sum_{b < b_i} \lambda_b (t_b - t_{b-1}) = \lambda_{b_i} (Y_i - t_{b_i - 1}) +  F_{b_i}$ where we define $F_b = \sum_{k < b} \lambda_k (t_k - t_{k-1})$, and importantly the $F_b$'s can be computed for $b = 1,\ldots, B$ prior to computing the $B_\ell$'s. Hence, we can write $B_\ell = \sum_i \lambda_{b_i}(Y_i - t_{b_i - 1}) + F_{b_i}$.
 
-% The joint likelihood of $(\lambda_b, b=1, \dots, B)$ as seen in \eqref{eq:lambda_likelihood} factors across 
-% the $\lambda_b$'s, and hence under the the prior $\lambda_b  
-% \stackrel{\text{iid}}{\sim} \Gam(a_\lambda, b_\lambda)$ the $\lambda_b$'s are 
-% conditionally independent given the other parameters in the model. The full 
-% conditional for each individual $\lambda_b$ is then given by
-% \begin{align*}
-%     \pi(\lambda_b \mid \text{everything else}) &\propto
-%     \prod_i \lambda_b^{d_i \, 1(b_i = b)} e^{-Z_{ib} \lambda_b e^{r(\bfX_i)}}
-%       \times \lambda_b^{a_\lambda - 1} \, e^{-b_\lambda \, \lambda_b}
-%     \\&\propto
-%     \lambda_b^{a_\lambda + A_b - 1} \, e^{-(b_\lambda + B_b) \, \lambda_b},
-% \end{align*}
-% where $A_b = \sum_i d_i \, 1(b_i = b)$ and $B_b = \sum_i Z_{ib} \, e^{r(\bfX_i)}$. We note that, in the case of the PH model, we can compute $B_b$ efficiently via 
-% recursion by noting that
-% \begin{align*}
-%     B_{b+1} = \frac{t_{b+1} - t_b}{t_b - t_{b-1}} \left(B_b - \sum_{i : Y_i \in [t_{b-1}, t_{b+1})} Z_{ib} e^{r(\bfX_i)}\right) + \sum_{i: Y_i \in [t_{b}, t_{b+1})} Z_{i(b+1)} e^{r(\bfX_i)}.
-% \end{align*}
-% Rather than requiring $O(NB)$ computations to compute all of the $B_b$'s, 
-% utilizing this recursion requires only $O(N)$ computations.
-
 Computations for the Gibbs sampler for the NPH model are very similar to those 
 for the PH model, and are deferred to the appendix; the main complication is that it is no longer easy to speed up computations via recursion, and so computations for the NPH model are slower by a factor of $B$. Full details for both algorithms are also given in Algorithm~\ref{alg:ph} and Algorithm~\ref{alg:nph} in the appendix.
-
-% In fact, for the update for the $\lambda_b$'s all of the 
-% computations are identical, except that we must alter the definition of $B_b$ 
-% to $B_b = \sum_i Z_{ib} e^{r(\bfX_i, b)}$. It is no longer easy to compute the 
-% $B_b$'s recursively, however.
-
-% To update $(\Tree_t, \sM_t)$ we first make a Metropolis-Hastings proposal to 
-% update the decision tree $\Tree_t$ and then sample $\sM_t$ from its full 
-% conditional distribution. The full details of these algorithms are given in Algorithm \ref{alg:ph} and Algorithm \ref{alg:nph} in the appendix.
-
 
 \section{Simulation Study}\label{sec:simulation}
 
@@ -597,7 +534,6 @@ Figure \ref{fig:combined_boxplot_ph} panel (a) also includes a boxplot of the su
 
 Simulation results show that when the true model is non-linear (Weibull-Spline and COXPH-BART), the proposed COXPH-BART model provides the minimum prediction error. The Cox-BART model also surpasses the nominal coverage rate whereas, other models fail to do so, especially in data generated using the non-linear models. These results suggest that fitting the Cox-Linear and Weibull-Linear  are insufficient in the presence of underlying non-linear associations among the covariates and it will provide improved estimation to adopt an ensemble based model as proposed in such situations. To balance this, COXPH-BART yields wider intervals and has higher RMSE when the parametric models are correctly specified.
 
-%-----------------------------------
 \begin{figure}
 \centering
 \begin{subfigure}[t]{0.85\textwidth}
@@ -622,7 +558,6 @@ Simulation results show that when the true model is non-linear (Weibull-Spline a
  \caption{Boxplot comparing the proposed COXPH-BART model with Cox-Linear and Weibull-Linear in terms of the error (panel (a)),  coverage probabilities (panel (b)), and length of the 90\% credible intervals (CI) (panel (c)) in predicting $r(\mathbf{x})$ under data simulated from different true models with proportional hazards.}
 \label{fig:combined_boxplot_ph}
 \end{figure}
-%------------------------------
 
 Note that each of the data generation mechanisms and the fitted models considered in the above simulation settings assumes proportional hazards, that is, the association and interaction among the covariates (modeled by $r(\mathbf{x})$) is independent of time $t$. To demonstrate performance of the non-proportional relative survival model (COXNPH-BART) proposed in this paper, we perform another simulation study mimicking the same \texttt{LeukSurv} data. We obtain 100 replicated datasets using the same data generation technique as in the proportional hazards simulation, except that in this case, we first fit a non-proportional hazard survival model $\lambda(t) = \lambda_0(t) \times \exp{r( \mathbf{x}, t)}$ to the data and then use this as the ground truth to simulate the survival times for the diseased population. With the non-proportional hazards survival times simulated as above, we fitted our proposed COXPH-BART and COXNPH-BART models and compared model performances based on the prediction accuracy of the relative survival function $S_E(t \mid \bfx) = \exp\left\{-\int_0^t \lambda_{0E}(z) \, e^{r(\bfx,z)} \ dz\right\}.$ As before, Monte Carlo approximations of the RMSE for the $m^{\text{th}}$ replicated dataset at time point $t$ was obtained as $\text{RMSE}_{m,t} = \sqrt{\frac{\{S_E(t, \bfx_i)_m - \widehat S_E(t, \bfx_i)_m\}}{N}}$ where $S_E(t \mid \mathbf{x})_m$ and $\widehat{S}_E(t \mid \mathbf{x})_m$ denotes the true and the estimated relative survival at time point $t$ obtained from the $m^{\text{th}}$ replicated dataset. 
 
@@ -642,28 +577,14 @@ We report the average RMSE, average coverage probability of 90\% credible interv
      \label{fig:NPH-plots}
  \end{figure}
 
+\section{Application to Colon Cancer Data}\label{sec:applications}
 
- \pagebreak
-\section{Application: effect of socio-demographic and clinical characteristics on colon cancer survival}\label{sec:applications}
-
-
-% Cohort of colon cancer patients
-% Variables available and/or derived
-% Known inequalities in colon cancer survival
-% RQ of interest: stage at diagnosis is a key strong prognostic factor, what is the importance of other patients' characteristics on net survival?
-% Describe characteristics of cohort by stage at diagnosis // NP PP estimation of NS [graphs in appendix]
-% Describe VI of stage + VI of other patient's characteristics [1. violin plots; 2. partial effects+trees]
-% Relate to other outputs from BART model and from NP PP estimations?
-% Discussion
 
 We extracted socio-demographic and clinical information on $18,296$ adults ($9,746$ males and $8,550$ females) diagnosed with colon cancer (ICD-10 C18) in England in 2012, using data from national population-based cancer registries linked to secondary care records. The most recent vital status was confirmed on or before December 31st 2019, providing 7 years of follow-up. 
-%Recent improvements in data availability, completeness and linkages offer new possibilities in studying the effects of key prognostic factors. Richer data mean greater insights into intricate patterns alongside increased model complexity.
 We used or derived information on the following key individual factors: age at diagnosis; cancer stage at diagnosis, coded according to the Tumor Node and Metastasis (TMN) system; deprivation score (1 = least deprived, 5 = most deprived), derived from income domain of the Index of Multiple Deprivation (IMD) measured at the small-area level of patient's residence at the time of their diagnosis; emergency presentation (EP, binary); presence of comorbidities (including cardiovascular disease, chronic obstructive pulmonary disease, diabetes, and renal disease, see Table \ref{tab:comorbidities} in the appendix). The tumor stages (I - IV) are derived from the size of the tumor (T), the number of nodes involved (N), and the presence of metastasis (M). EP is one of eight routes to diagnosis, and is defined by an algorithm based on linked electronic health records \citep{elliss:2012}: it corresponds to an emergency route via A\&E, emergency GP Referral, emergency transfer, emergency consultant outpatient referral, emergency admission or attendance.
 
 A summary of the data set is presented in Table \ref{table:table1} for males and Table \ref{table:table1_women} in the appendix for females. We observe higher rates of EPs in patients with stage IV cancer tumor compared to those with stage I: from $7.6\%$ and $10.9\%$ in stage I to $39.4\%$ and $42.2\%$ in stage IV, respectively, for male and female patients. Proportions of patients with comorbidities increase with stage at diagnosis in females, but remain stable throughout all stages in males. As expected, mean follow-up time decreases from $5.6$ and $5.8$ years in males and females diagnosed at stage I to $1.4$ years for patients diagnosed at stage IV, with less than $30\%$ of stage I patients dying in the 7 years of follow-up in contrast to over $90\%$ of stage IV patients.
 
-
-% \renewcommand{\arraystretch}{1.1}
 \begin{table}[!ht]
     \centering
     \resizebox{\textwidth}{!}{
@@ -718,16 +639,6 @@ Figure \ref{fig:rpartvimp_males} in the appendix presents the importance of each
    \includegraphics[width=0.4\textwidth]{peff40_males.pdf} & \\
    (e) 
 \end{tabular}
-% \begin{tabular}{ccc}
-% \includegraphics[width=0.3\textwidth]{peff1_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{peff10_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{peff20_males.pdf}\\
-%  (a) & (b) & (c) \\
-%  \includegraphics[width=0.3\textwidth]{peff30_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{peff40_males.pdf} & 
-% \\
-%  (d) & (e) & 
-%  \end{tabular}
 \caption{ Males colon cancer data: Partial effect of age at 2, 20, 40, 60, and 80 months.}
 \label{fig:peff_age_males}
 \end{figure}
@@ -745,16 +656,6 @@ Figure \ref{fig:rpartvimp_males} in the appendix presents the importance of each
    \includegraphics[width=0.5\textwidth]{vimp40_males.pdf} & \\
    (e) 
 \end{tabular}
-% \begin{tabular}{ccc}
-% \includegraphics[width=0.5\textwidth]{vimp1_males.pdf} & 
-% \includegraphics[width=0.5\textwidth]{vimp10_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{vimp20_males.pdf}\\
-%  (a) & (b) & (c) \\
-%  \includegraphics[width=0.3\textwidth]{vimp30_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{vimp40_males.pdf} & 
-% \\
-%  (d) & (e) & 
-%  \end{tabular}
 \caption{ Males colon cancer data. Variable importance ($R^2$) distributions at 2, 20, 40, 60, and 80 months. Lower summary $R^2$ deleting each variable indicates \emph{higher} variable importance.\label{fig:vimp_males}}
 \end{figure}
 
@@ -771,263 +672,38 @@ Figure \ref{fig:rpartvimp_males} in the appendix presents the importance of each
    \includegraphics[width=0.5\textwidth]{rpart40_males.pdf} & \\
    (e) 
 \end{tabular}
-% \begin{tabular}{c c c}
-% \includegraphics[width=0.3\textwidth]{rpart1_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{rpart10_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{rpart20_males.pdf}\\
-%  (a) & (b) & (c) \\
-%  \includegraphics[width=0.3\textwidth]{rpart30_males.pdf} & 
-% \includegraphics[width=0.3\textwidth]{rpart40_males.pdf} & 
-% \\
-%  (d) & (e) & 
-%  \end{tabular}
 \caption{ Males colon cancer data. Variable importance (net survival) trees at 2, 20, 40, 60, and 80 months.}
 \label{fig:tree_males}
 \end{figure}
 
-
-% \section{Application: Leuk Data - pl keep this section for now}\label{sec:leuk-analysis}
-% We first illustrate the methodology on a publicly available dataset on time to death from leukemia. This dataset is available in the \texttt{spBayesSurv} package in \texttt{R} as the \texttt{LeukSurv} dataset; it contains 1,043
-% patients suffering from acute myeloid leukemia, with their age, sex, white blood
-%  cell count at the time of diagnosis (truncated at 500) and Townsend score (lower values indicate that the individual is from a less affluent area). We then augmented this dataset with an approximation of the baseline survival probability of the individuals in the background population, stratified by sex and age at baseline. \citep{linero2017abayesian}
-
-% We fitted both of our proposed proportional and non-proportional piecewise exponential models for the relative survival and compute the leave-one-out expected log predictive density (ELPD), which is an omnibus measure of goodness-of-fit for model comparison. Additional details on using this statistic are given by Vehtari, Gelman, and Gabry (2015). The ELPD of the non-proportional hazards model was found to be substantially higher as compared to the proportional hazards model, indicating a better fit to the data. However, for the sake of illustration we will proceed and discuss our data analytical findings under both models.
-
-% Next, we used the \texttt{possum} package (with some additional, optional, code for improving the
-% visualization) in \texttt{R} to compute the posterior projection of the fitted BART model for $r(\mathbf{x})$ onto an additive model. We also compute projections leaving one predictor out at a time to help assess variable importance in obtaining predictions. Figure (xx-include partial effect figure) shows the posterior effect of age, white blood cell count, and Townsend index. Note that we did not include the visualization of the the posterior effect of sex in this case because
-% it turns out not to be very relevant, as we will also see when we look at the summary $R^2$s for the models. 
-
-% \begin{figure}
-%      \centering
-%      \includegraphics[width=.8\textwidth]{PH_PartialEffect.png}
-%      \caption{Each of the three predictors examined here (age, white blood cell count, and Townsend index) have an increasing relationship with $r(\mathbf{x})$.}
-%      \label{fig:PH_partialeffect}
-%  \end{figure}
-
-% \begin{figure}[H]
-%      \centering
-%      \includegraphics[width=.8\textwidth]{PH_Rsquared.png}
-%      \caption{Figure showing $
-%   R^2 = \frac{\sum_i \{r(\bfX_i) - \widetilde r(\bfX_i)\}}{\sum_I \{r(\bfX_i) - \bar r\}^2}
-% $ for each of the summary models under proportional hazards assumption (\cite{woody2020model}), where $\widetilde r = \arg \min_{q \in \mathcal Q} \|r - q\|$ and $\bar r = \frac{1}{N} \sum_i r(\bfX_i)$. This quantity represents the proportion of the variability in $r(\mathbf{x})$ that can be explained by the projection onto the simpler summary model $\mathcal Q$.}
-%      \label{fig:PH-Rsquared}
-%  \end{figure}
- 
-
-
-%  Summarizing a non-proportional hazards model is more challenging than a proportional hazards
-% model, as the effect of the covariates on survival is no longer constant over time. To do this, we focus on the relative survival function 
-% $$
-%   S_E(t \mid x) = \exp\left\{-\int_0^t \lambda_{0E}(z) \, e^{r(x,z)} \ dz\right\}.
-% $$
-% Note that the integrals here are easy to evaluate, as the hazard is assumed piecewise constant. To isolate the effects within each bin, we consider specifically the quantities 
-% $$
-%   R(b \mid x) = \exp\left\{-\int_{t_{b-1}}^{t_b}
-%     \lambda_{0E}(z) \, e^{r(x,z) \ dz}\right\}.
-% $$
-% \begin{figure}
-%      \centering
-%      \includegraphics[width=.8\textwidth]{NPH_PartialEffect.png}
-%      \caption{From top to bottom, the rows of the figure above correspond to bins $b = 1, 10, 20$, respectively. }
-%      \label{fig:NPH_partialeffect}
-%  \end{figure}
-%  Interestingly, in Figure \ref{fig:NPH_partialeffect}, we see that the evidence for the relevance of white blood cell count changes over time, while the effect of age appears to increase from $b = 1$ to $b = 10$. Both of these trends are predictable, as the risk of dying from old age increases over time, while current white blood cell counts may not be predictive of survival far out into the future where an individual has already survived for many years. We also examined the variable importance under the non-proportional hazards model, as we did for the PH model, but now with variable importances varying over time. Figure {xx} shows the 
-% \begin{figure}{H}
-%      \centering
-%      \includegraphics[width=.8\textwidth]{NPH_Rsquared.png}
-%      \caption{From top to bottom, the rows of the figure above correspond to bins $b = 1, 10, 20$, respectively. }
-%      \label{fig:NPH-Rsquared}
-%  \end{figure}
- 
-% \paragraph{Comparison With Other Models} We consider two alternative models that
-%  make use of the proportional hazards: a model with a piecewise constant baseline
-%  hazard for $\lambda_{0E}(t)$, and a model with a Weibull baseline hazard. Both
-%  of these models take $r(\bx)$ to be an additive model, with continuous terms
-%  approximated using natural cubic splines; further details on these models are
-%  given in Appendix~\ref{sec:details}. We compare models via a Bayes factor
-%  \begin{align*}
-%    \text{BF}^\star
-%    = \frac{m_1(\Data_k \mid \Data_{-k})}{m_2(\Data_k \mid \Data_{-k})}
-%  \end{align*}
-%  where $m_1$ XXX
-
-
-\pagebreak
 \section{Discussion}\label{sec:discussion}
 
-
-% \begin{itemize}
-% \item Methodology. R code.
-% \item Simulation study (any interesting messages?).
-% \item Additional insights coming from coupling more advanced modelling methods (robustness) with state-of-the-art data sets.
-% \item Although inequalities by deprivation are evident, researchers must consider the information provided by new variables to identify the root reasons inducing these inequalities. Our application shows that EP is an important prognostic factor. It is of interest to explore the mechanisms through which EP influences healthcare access and outcomes.
-% \item Time-varying effects of EP, stage and age
-% \item This work opens the door to analyzing and understanding the importance of prognostic factors for different cancer sites, and to validate our findings in data sets from other countries.
-% \item Complements typical results from standard NS analyses
-
-
-% \item Other challenges related to insufficiently stratified lifetables \citep{rubio:2021}.
-% \end{itemize}
-
-In this article, we have developed a novel flexible Bayesian semi-parametric approach for estimating excess hazard and associated net survival probability in the relative survival setting using BART. More specifically, we have modeled the baseline of the excess hazard function as piecewise exponential and modeled the complex non-linear associations among the covariates using BART, allowing for both proportional as well as non-proportional (time-varying) hazard assumptions, and thus avoiding the need to specify closed-form variable transformations or covariate interactions. Using a Bayesian ensemble-based model enables us to effectively merge the predictive capabilities of machine learning with a robust approach to quantifying uncertainty in our conclusions. Simulation results validate that our proposed models are conservative in terms of the coverage provided by credible intervals, even under model misspecification. This method facilitates the sharing of information across relevant sub-populations, enabling us to retain the flexibility of Nelson-Aalen type estimators while accommodating continuous characteristics and sparsely observed sub-groups. 
-% Computational codes for fitting the COXPH-BART and COXNPH-BART models will be made available on the authors’ websites. 
+In this article, we have developed a novel flexible Bayesian semi-parametric
+approach for estimating excess hazard and associated net survival probability in
+the relative survival setting using BART. More specifically, we have modeled the
+baseline of the excess hazard function as piecewise exponential and modeled the
+complex non-linear associations among the covariates using BART, allowing for
+both proportional as well as non-proportional (time-varying) hazard assumptions,
+and thus avoiding the need to specify closed-form variable transformations or
+covariate interactions. Using a Bayesian ensemble-based model enables us to
+effectively merge the predictive capabilities of machine learning with a robust
+approach to quantifying uncertainty in our conclusions. Simulation results
+validate that our proposed models are conservative in terms of the coverage
+provided by credible intervals, even under model misspecification. This method
+facilitates the sharing of information across relevant sub-populations, enabling
+us to retain the flexibility of Nelson-Aalen type estimators while accommodating
+continuous characteristics and sparsely observed sub-groups. 
 
 Applicability of the proposed model has been demonstrated through a case study concerning the analysis of colon cancer data in England, along with the proposed posterior summarization techniques to quantify feature importance and interaction with time. Tumor stage at diagnosis is a well-established clinical prognostic factor, with more advanced stages being associated with fewer treatment options and lower survival probabilities. Additionally, extensive literature has examined disparities in cancer survival linked to deprivation. However, researchers should consider newly available variables, obtained through data linkage, to better identify the underlying causes of these inequalities. Given the flexibility of the COXNPH-BART model and its ability to consider all possible interactions, we were able to provide new insights into factors driving colon cancer net survival, up to 7 years after diagnosis. More specifically, the case study demonstrates the strong prognostic value of emergency presentations (EP), potentially as a proxy for healthcare access and usage. It also illustrates the additional insights epidemiologists and clinicians could gain by considering the effect of factors beyond stage at diagnosis and deprivation level. The outputs of the proposed modeling approach enable the analysis of time-varying variable importance, highlighting different phases in the patients' follow-up. Clinical factors, such as the four comorbidities included here and deprivation do not bear large importance in explaining net survival, throughout follow-up. It is important to emphasize that these conclusions apply at the population level, which is the focus of this work. Certain clinical prognostic factors may still be important at the individual level, but that is beyond the scope of our study. This work opens the door to analyzing and understanding the importance of prognostic factors for different cancer sites, as well as validating our findings in datasets from other countries.
 
-\section*{Data Availability and Ethical Approval}
+\subsubsection*{Data Availability and Ethical Approval}
 
 The data used for this study are the English National Cancer Registry data 1971–2016. Cancer registration data consist of patient information and as such, it is protected under the Data Protection Act 1998 and GDPR 2018 and cannot be made available as open data. Formal requests for release of cancer registration data can be made to the data custodian NHS Digital (NHSD). The researchers will have beforehand obtained all the ethical and statutory approvals required for accessing sensitive data. Detailed information on the application process can be found at https://digital.nhs.uk/ndrs/. The authors have obtained the ethical and statutory approvals required for this research (PIAG 1-05(c)/2007); ethical approval updated 6 April 2017 (REC 13/LO/0610).
 
 \bibliographystyle{apalike}
 \bibliography{mybib}
 
-% \begin{figure}
-% \centering
-% 	\vspace{0.1in}
-%         \includegraphics[width=1\textwidth]{Rplot.pdf}
-%         \caption{Posterior summarization of the function $r(x)$ under the
-%         PH specification of the model.}
-% \end{figure}
-
-% \begin{figure}
-% \centering
-% 	\vspace{0.1in}
-%         \includegraphics[width=1\textwidth]{SummaryRsquared}
-%          \caption{}
-% \end{figure}
-
-
-% \begin{figure}
-% \centering
-% 	\vspace{0.1in}
-%         \includegraphics[width=1\textwidth]{AdditiveSummaryPlot.pdf}
-%          \caption{}
-% \end{figure}
-
 \appendix
-
-\begin{comment}
-\section{Derivation of the Gibbs Sampler for NPH Model}
-
-The NPH model assumes a hazard function of the form $\lambda(t \mid x) = 
-\sum_b 1(t \in G_b) \lambda_b \, \exp\{r(x, b)\}$. Let $b(i)$ denote the bin 
-that $Y_i$ falls into. The likelihood of the data becomes
-\begin{align*}
-  \prod_i [\lambda_{b(i)} \, \exp\{r(x, b(i)\}]^{\delta_i}
-    \times \exp\left\{- \int_0^{Y_i} \lambda_{b(t)} 
-      \, \exp\{r(x, b(t)\}\}\right\}.
-\end{align*}
-Now, define $Z_{ib} = 0$ if $Y_i < t_b$, $Z_{ib} = Y_i - t_b$ if $Y_i \in 
-[t_b, t_{b+1})$, and $Z_{ib} = t_{b+1} - t_b$ if $Y_i > t_{b+1}$. Then we can 
-rewrite the integrated hazard as
-\begin{align*}
-    \Lambda_i = \sum_b Z_{ib} \lambda_b \exp\left\{r(x, b)\right\}.
-\end{align*}
-So we can rewrite the whole likelihood as a product as follows:
-\begin{align*}
-    \prod_{i,b} \left(\lambda_b e^{r(x, b)}\right)^{\delta_i \, 1(b(i) = b)}
-      \times \exp\left(-Z_{ib} \lambda_b e^{r(x,b)}\right).
-\end{align*}
-Now, let us suppose that we want to update tree $\Tree_t$. Let $\eta_{ib} = r(\bfX_i, b) - g(\bfX_i, b; \Tree_t, \sM_t)$. Then the likelihood associated with leaf node $\ell$ of tree $b$ is given by
-\begin{align*}
-    \prod_{(i,b) \leadsto \ell} \exp\left\{
-      \delta_i 1(b_i = b) (\eta_{ib} + \mu) 
-        - Z_{ib} \lambda_b e^{\eta_{ib} + \mu}
-    \right\}
-    \propto 
-    \prod_{(i,b) \leadsto \ell} \exp\left\{
-      \delta_i 1(b_i = b) \mu
-        - Z_{ib} \lambda_b e^{\eta_{ib} + \mu}
-    \right\}
-\end{align*}
-Now, let $A_\ell = \sum_{(i,b) \leadsto \ell} \delta_i 1(b_i = b)$ and let
-$B_\ell = \sum_{(i,b) \leadsto \ell} Z_{ib} \, \lambda_b \, e^{\eta_{ib}}$; we
-can then write the likelihood as $\exp(A_\ell \mu - B_\ell e^{\mu})$ which,
-after combining with the prior $\mu \sim \log \Gam(a,b)$ gives a marginal
-likelihood for the tree equal to
-\begin{align*}
-    L(\Tree_t) = \prod_{\ell} \frac{b^a}{\Gamma(a)} 
-    \times \frac{\Gamma(a + A_\ell)}{(b + B_\ell)^{a + A_\ell}}.
-\end{align*}
-So things extend from the PH to the NPH setting fairly naturally, with the 
-downside being that things are less efficient because we need to actually need 
-to store/work with the $Z_{ib}$'s and sum them out for each $i$. To speed up the 
-algorithm what is needed is a fast way to compute both $A_\ell$ and $B_\ell$.
-
-\paragraph{Efficiently Computing $A_\ell$}
-Suppose that we are updating sufficient statistics for each individual $i$ in 
-the sample. The way this is done is to drop individuals down the tree, with the 
-added wrinkle being that individuals might have to be dropped down multiple 
-paths.
-
-\paragraph{Scope for Efficiently Computing $B_\ell$}
-I think it should be possible to accelerate computaton of $A_\ell$, but how 
-would we go about speeding up $B_\ell$? How would we go about speeding up 
-computation of $B_\ell$? 
-
-The thing that might result in a payoff is if we can efficiently figure out 
-whether $(i,b) \leadsto \ell$ in a way that does not scale with the number of 
-bins, i.e., we want to do all these things simultaneously to save compute. 
-First, we might assume that $g(x, b ; \Tree, \sM) = 1(b \le c_b) \, g(x; \Tree, 
-\sM)$, i.e., we assume that time only comes into the tree through whether $b \le 
-c_b$. XXX
-
-\textbf{As a practical matter:} probably what I should do is store, for each 
-individual, a vector $\bZ_i$ (many of which might be zero) along with a matrix 
-$\widehat \lambda$. Maybe we consider revisiting these optimizations if the 
-problems we are looking at seem like we will actually end up needing them. 
-
-\paragraph{Updating the Baseline Parameters}
-The likelihood associated to $\lambda_b$ is given by
-\begin{align*}
-    \prod_{i} \exp\left(\delta_i \, 1(b(i) = b) \, \lambda_b 
-      - Z_{ib} \lambda_b e^{r(\bfX_i, b)}
-    \right)
-    = \exp\left(A_b \log \lambda_b - B_b \, e^{\log \lambda_b}\right)
-\end{align*}
-where $A_b = \sum_{i : b(i) = b} \delta_i$ and $B_b = \sum_i Z_{ib} r_{ib}$.
-Conveniently given the sparsity of $Z_{ib}$ we can efficiently compute the 
-$B_b$'s as $\texttt{colSums(Z * r)}$. This gives the final result
-\begin{align*}
-    \lambda_b \sim \Gam(a_\lambda + A_b, b_\lambda + B_b),
-\end{align*}
-where $a_\lambda$ and $b_\lambda$ are priors on the shape and rate parameters
-of the gamma prior on the $\lambda_b$'s (which are usually also updated).
-
-\paragraph{The Likelihood for an Individual}
-The individual-level likelihood function is given by
-\begin{align*}
-    \left(\lambda_P(Y_i \mid X_i) + \lambda_{b(i)} e^{r(\bfX_i, b(i))} 
-    \right)^{\delta_i}
-    \times \exp\left\{-\sum_b Z_{ib} \, \lambda_b \, e^{r(\bfX_i, b(i))}\right\}.
-\end{align*}
-We have a similar issue of computing this efficiently, but I think we will just 
-proceed with an inefficient version for simplicity. How do we actually compute
-the sum efficiently? We can implement this in code by taking $\texttt{Z \% r}$
-and then dot this with $\lambda$, i.e., do 
-$\texttt{({Z \% r)} * base\_haz}$.
-
-\paragraph{Updating the Indicators}
-This should be similar to how I deal with the likelihood. 
-
-\paragraph{Saving Computations}
-At a minimum, I should not do a computation if $Z_b = 0$. If $Z_b = 0$, then 
-(for sure) should not compute the excess hazard part, hence saving cycles. The 
-only tricky part I think is figuring out whether to calculate the excess hazard, 
-as I might end up in a situation where $Z_b = 0$ but a failure occurred because 
-$Y = t_b$; this is especially likely to happen because the grid points are 
-chosen to be quantiles. I think I need to just be careful when I get to the 
-phase of coding up the computation of the sufficient statistics in the 
-AddSuffStat part.
-
-How do I actually do this? I think the way the code works is that it calls 
-UpdateSuffStat as part of the likelihood, and then follows by passing things 
-down the tree. I think the simplest way to do this is probably to make 
-AddSUffStat also take b and Zb as arguments. Otherwise, I think things get 
-complicated. We can then put the loop over b in UpdateSuffStat, and just not run 
-the increment if both $Z_{ib} = 0$ and $b(i) \ne b$. I also think the predict 
-functions are going to need to return a matrix rather than a vector, sadly.
-\end{comment}
 
 \clearpage
 
@@ -1054,91 +730,6 @@ where $A_\ell = \sum_{(i,b) \leadsto \ell} d_i 1(b_i = b)$ and $B_\ell =
 \sum_{(i,b) \leadsto \ell} Z_{ib} \lambda_b e^{\eta_{ib}}$; similarly, the 
 update for the leaf predictions is given by $\mu_{t\ell} \sim \log \Gam(a + 
 A_\ell, b + B_\ell)$. The full details of this algorithm are given in Algorithm~\ref{alg:nph}.
-
-\begin{comment}
-\begin{algorithm}[H]
-\caption{Bayesian Backfitting for the Non-Proportional Hazards (NPH) Model}
-\KwInput{Data $\Data = \{(T_i, \delta_i, \bx_i)\}_{i=1}^N$}
-\BlankLine
-\KwOutput{Posterior samples of $\{\Tree_m, \sM_m\}_{m=1}^T$ and $\{\lambda_b\}_{b=1}^B$}
-\BlankLine
-{Initialize the trees $\{\Tree_m\}_{m=1}^T$ and their leaf parameters $\{\sM_m\}_{m=1}^T$}
-\BlankLine
-
-\For{\textnormal{each iteration}}{
-    \For{\textnormal{each individual} $i = 1, \dots, N$}{
-        Update $d_i \sim \Bernoulli\left\{\frac{\delta_i \lambda_{b_i} e^{r(\bfX_i, b_i)}}{\lambda_P(Y_i \mid X_i) + \lambda_{b_i} e^{r(\bfX_i, b_i)}}\right\}$ \;
-    }
-    \For{\textnormal{each tree} $m = 1, \dots, T$}{
-        Propose a new tree structure $\Tree \sim Q(\Tree_m \to \Tree)$\;
-        Compute $\eta_{ib} = r(\bfX_i, b) - g(\bfX_i, b; \Tree_m, \sM_m)$ for all $(i,b)$\;
-        
-        Compute $A_\ell = \sum_{(i,b) \leadsto \ell} d_i 1(b_i = b)$ and $B_\ell = \sum_{(i,b) \leadsto \ell} Z_{ib} \lambda_b e^{\eta_{ib}}$\;
-        
-        Compute $L(\Tree)$ and $L(\Tree_m)$ as:
-        \begin{align*}
-            L(\Tree) &\propto \prod_{\ell} \frac{\Gamma(a + A_\ell)}{(b + B_\ell)^{a + A_\ell}} \times \frac{b^a}{\Gamma(a)}
-        \end{align*}
-        
-        Set $\Tree_m = \Tree$ with probability $A = \min\left\{\frac{\pi(\Tree)\,L(\Tree)\,Q(\Tree \to \Tree_m)}{\pi(\Tree_m)\,L(\Tree_m)\,Q(\Tree_m \to \Tree)}, 1 \right\}$\;
-        
-        \For{\textnormal{each leaf} $\ell \in \Leaves(\Tree_m)$}{
-            Sample $\mu_{m\ell} \sim \log \Gam(a + A_\ell, b + B_\ell)$\;
-        }
-    }
-
-    \For{\textnormal{each bin} $b = 1, \dots, B$}{
-        Compute $A_b = \sum_{i: b_i = b} d_i 1(b_i = b)$\;
-        Compute $B_b = \sum_i Z_{ib} e^{r(\bfX_i, b)}$\;
-        Sample $\lambda_b \sim \Gam(a_\lambda + A_b, b_\lambda + B_b)$\;
-    }
-}
-\end{algorithm}
-\end{comment}
-
-\begin{comment}
-\begin{algorithm}[H]
-\caption{Bayesian Backfitting for the Proportional Hazards Model}
-\KwInput{Data $\Data = \{(T_i, \delta_i, \bx_i)\}_{i=1}^N$}
-\BlankLine
-\KwOutput{Posterior samples of $\{\Tree_m, \sM_m\}_{m=1}^M$ and $\{\lambda_b\}_{b=1}^B$}
-\BlankLine
-{Initialize the trees $\{\Tree_m\}_{m=1}^T$ and their leaf parameters $\{\sM_m\}_{m=1}^T$}
-\BlankLine
-
-\For{each iteration}{
-    \For{\textnormal{each individual} $i = 1, \dots, N$}{
-        Update $d_i \sim \Bernoulli\left\{\frac{\delta_i \lambda_{b_i} e^{r(\bfX_i)}}{\lambda_P(Y_i \mid X_i) + \lambda_{b_i} e^{r(\bfX_i)}}\right\}$ \;
-    }
-    \For{\textnormal{each tree} $m = 1, \dots, T$}{
-        Propose a new tree structure $\Tree \sim Q(\Tree_m \to \Tree)$\;
-        Compute $A_\ell = \sum_{i: X_i \leadsto \ell} d_i$ and $B_\ell = \sum_{b, i: X_i \leadsto \ell} Z_{ib} \, \lambda_b \, e^{\eta_i}$ for each leaf $\ell$ in $\Tree$ and $\Tree_m$\;
-        Compute $L(\Tree)$ and $L(\Tree_m)$ as:
-        \begin{align*}
-            L(\Tree) &\propto \prod_{\ell} \frac{\Gamma(a + A_\ell)}{(b + B_\ell)^{a + A_\ell}} \times \frac{b^a}{\Gamma(a)}
-        \end{align*}
-        
-        Set $\Tree_m = \Tree$ with probability $A = \min\left\{\frac{\pi(\Tree)\,L(\Tree)\,Q(\Tree \to \Tree_m)}{\pi(\Tree_m)\,L(\Tree_m)\,Q(\Tree_m \to \Tree)}, 1 \right\}$\;
-        
-        \For{\text{each leaf} $\ell \in \Leaves(\Tree_m)$}{
-            Sample $\mu_{m\ell} \sim \log \Gam(a + A_\ell, b + B_\ell)$\;
-        }
-    }
-
-    \For{\text{each bin} $b = 1, \dots, B$}{
-        Compute $A_b = \sum_{i: b_i = b} d_i$\;
-        Compute $B_b = \sum_i Z_{ib} e^{r(\bfX_i)}$ using:
-        \begin{align*}
-            B_{b+1} = \frac{t_{b+1} - t_b}{t_b - t_{b-1}} \left(B_b - \sum_{i: Y_i \in [t_{b-1}, t_{b+1})} Z_{ib} e^{r(\bfX_i)}\right) + \sum_{i: Y_i \in [t_{b}, t_{b+1})} Z_{i(b+1)} e^{r(\bfX_i)}
-        \end{align*}
-        Sample $\lambda_b \sim \Gam(a_\lambda + A_b, b_\lambda + B_b)$\;
-    }
-}
-\end{algorithm}
-\end{comment}
-
-
-
 
 \begin{algorithm}
 \caption{Bayesian Backfitting for the Proportional Hazards Model\label{alg:ph}}
@@ -1179,9 +770,6 @@ A_\ell, b + B_\ell)$. The full details of this algorithm are given in Algorithm~
 }
 \end{algorithm}
 
-% \section{Gibbs Sampler for the NPH Model}
-% \label{gibbs_nph}
-
 \begin{algorithm}
 \caption{Bayesian Backfitting for the Non-Proportional Hazards (NPH) Model\label{alg:nph}}
 \KwInput{Data $\Data = \{(Y_i, \delta_i, \bfX_i, \lambda_P(\text{age}_i + Y_i \mid \bfW_i))\}_{i=1}^N$}
@@ -1220,38 +808,6 @@ A_\ell, b + B_\ell)$. The full details of this algorithm are given in Algorithm~
     }
 }
 \end{algorithm}
-
-
-
-% \section{Details for Competing Models}
-% \label{sec:details}
-
-% \section{Notation}
-
-% \begin{itemize}
-%     \item $\Data$: The observed dataset, consisting of event times $Y_i$, censoring indicators $\delta_i$, and covariate vectors $\bfX_i$ for $i = 1, \dots, N$.
-%     \item $N$: Total number of subjects in the dataset.
-%     \item $\{\Tree_t, \sM_t\}_{t=1}^T$: Collection of tree structures $\Tree_m$ and their associated leaf parameters $\sM_m$, with $T$ being the total number of trees.
-%     \item $\{\lambda_b\}_{b=1}^B$: Collection of baseline hazard parameters $\lambda_b$, with $B$ being the number of bins in the piecewise exponential model.
-%     \item $d_i$: Latent indicator variable for subject $i$, representing whether the event is attributed to the excess hazard.
-%     \item $\lambda_{b_i}$: Baseline hazard parameter corresponding to the bin $b_i$ which $T_i$ falls into.
-%     \item $r(\bfX_i)$: Log-linear predictor for subject $i$, computed from the sum of the tree ensembles.
-%     \item $\lambda_P(t \mid \bfW_i)$: Population hazard rate for subject $i$ at time $t$ given covariate vector $\bfW_i$.
-%     \item $Q(\Tree_m \to \Tree)$: Markov transition function for proposing a new tree structure $\Tree$ given the current tree structure $\Tree_m$.
-%     \item $L(\Tree)$: Integrated likelihood of tree $\Tree$, incorporating the likelihood contributions from all subjects $i$ that fall into the leaf nodes of $\Tree$.
-%     \item $\Leaves(\Tree)$: Collection of leaf nodes associated with tree $\Tree$.
-%     % \item $A_\ell$: Summation of latent indicators $d_i$ for all subjects $i$ that fall into leaf node $\ell$, specifically $A_\ell = \sum_i d_i$.
-%     % \item $B_\ell$: Summation involving the baseline hazard parameters and the exponential term from the log-linear predictor, specifically $B_\ell = \sum_{i,b} Z_{ib} \lambda_b e^{\eta_i}$.
-%     \item $\eta_i$: Residual log-linear predictor for subject $i$ after removing the contribution from the tree being updated, $\eta_i = r(\bfX_i) - g(\bfX_i; \Tree_t, \sM_t)$. Dependence on $(\Tree_t, \sM_t)$ is suppressed.
-%     \item $\mu_{t\ell}$: Leaf parameter associated with leaf node $\ell$ in tree $\Tree_t$.
-%     \item $\Gam(a, b)$: Gamma distribution parameterized by shape $a$ and rate $b$.
-%     \item $\log \Gam(a, b)$: Log-gamma distribution parameterized by shape $a$ and rate $b$.
-%     \item $\pi(\Tree)$: Prior probability of tree structure $\Tree$.
-%     \item $Z_{ib}$: Variable representing the time interval contribution for subject $i$ and bin $b$. Given by $Z_{ib} = 0$ if $Y_i < t_b$, $Z_{ib} = Y_i - t_b$ if $t_b \le Y_i < t_{b+1}$, and $Z_{ib} = t_{b + 1} - t_b$ if $Y_i > t_{b+1}$.
-%     \item $t_b$: $t_0 = 0 < t_1 < t_2 < \cdots < t_B = \infty$ is time grid.
-%     \item $b_\lambda$: Rate parameter of the gamma prior for the baseline hazard parameters.
-%     \item $a_\lambda$: Shape parameter of the gamma prior for the baseline hazard parameters.
-% \end{itemize}
 
 \clearpage
 
